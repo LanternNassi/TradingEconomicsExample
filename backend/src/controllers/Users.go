@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"osprey/src/models"
 
@@ -68,29 +69,35 @@ func (s *Server) GetUser(ctx echo.Context) error {
 
 func (s *Server) Login(ctx echo.Context) error {
 
-	type Login struct {
-		username string
-		password string
-	}
+	LoginCredentials := new(models.User)
 
-	var LoginCredentials Login
-
-	if err := ctx.Bind(&LoginCredentials); err != nil {
+	if err := ctx.Bind(LoginCredentials); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"Error": err.Error()})
 	}
 
-	var user models.User
+	fmt.Println(LoginCredentials)
+
+	type UserResponse struct {
+		Email    string `bson:"email"`
+		Username string `bson:"username"`
+	}
+
+	var user UserResponse
 
 	filter := bson.M{}
 
-	filter["username"] = LoginCredentials.username
-	filter["password"] = LoginCredentials.password
+	filter["email"] = LoginCredentials.Email
+	filter["password"] = LoginCredentials.Password
 
-	err := s.DB.Collection("Users").FindOne(ctx.Request().Context(), filter).Decode(user)
+	err := s.DB.Collection("Users").FindOne(ctx.Request().Context(), filter).Decode(&user)
 
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"Error": err.Error()})
 	}
 
-	return ctx.JSON(http.StatusAccepted, map[string]string{"Status": "Authorized"})
+	return ctx.JSON(http.StatusAccepted, map[string]interface{}{
+		"email":    user.Email,
+		"username": user.Username,
+	})
+
 }

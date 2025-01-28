@@ -38,7 +38,6 @@ const App = () => {
 
   return (
     <DnDCalendar
-      defaultView='week'
       events={events}
       localizer={localizer}
       onEventDrop={onEventDrop}

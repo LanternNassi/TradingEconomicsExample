@@ -14,4 +14,7 @@ type IServerClient interface {
 	Login(ctx echo.Context) error
 
 	GetEvents(ctx echo.Context) error
+	SetEventNotification(ctx echo.Context) error
+	GetEventNotifications(ctx echo.Context) error
+	RemoveEventNotification(ctx echo.Context) error
 }

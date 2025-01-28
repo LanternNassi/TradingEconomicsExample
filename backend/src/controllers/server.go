@@ -9,12 +9,17 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
+	// "github.com/labstack/echo/v4/middleware"
+	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Server struct {
-	echo *echo.Echo
-	DB   *mongo.Database
+	echo      *echo.Echo
+	DB        *mongo.Database
+	scheduler *cron.Cron
 }
 
 func (s Server) Ready(ctx echo.Context) error {
@@ -34,15 +39,18 @@ func (s Server) StartServer() error {
 		return err
 	}
 
+	go s.scheduler.Start()
+
 	return nil
 
 }
 
-func NewServerClient(db_client *mongo.Database, echo_client *echo.Echo) config.IServerClient {
+func NewServerClient(db_client *mongo.Database, echo_client *echo.Echo, scheduler *cron.Cron) config.IServerClient {
 
 	client := &Server{
-		echo: echo_client,
-		DB:   db_client,
+		echo:      echo_client,
+		DB:        db_client,
+		scheduler: scheduler,
 	}
 
 	client.registerRoutes()
@@ -51,14 +59,22 @@ func NewServerClient(db_client *mongo.Database, echo_client *echo.Echo) config.I
 }
 
 func (s *Server) registerRoutes() {
+
+	// s.echo.Use(middleware.CORS())
+	s.echo.Use(middleware.CORS())
+
 	s.echo.GET("/readiness", s.Ready)
 
 	ug := s.echo.Group("/Users")
 	ug.GET("/:id", s.GetUser)
 	ug.GET("/", s.GetUsers)
 	ug.POST("/", s.AddUser)
+	ug.POST("/login", s.Login)
 
 	eg := s.echo.Group("Events")
 	eg.GET("/", s.GetEvents)
+	eg.POST("/Notifications", s.SetEventNotification)
+	eg.GET("/Notifications/:email", s.GetEventNotifications)
+	eg.DELETE("/Notifications/:CalendarId", s.RemoveEventNotification)
 
 }

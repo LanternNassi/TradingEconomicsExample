@@ -3,11 +3,13 @@
 import { useRouter } from 'next/navigation';
 
 import React , {useState} from 'react';
-
+import { useUserStore } from '@/store/UserStore';
 
 const Navbar = () => {
 
     const router = useRouter();
+
+    const { Logout} = useUserStore();
 
     const [activeRoute, setActiveRoute] = useState("Dashboard");
 
@@ -18,22 +20,17 @@ const Navbar = () => {
                     <h1 className="text-xl font-bold">{activeRoute}</h1>
                     <div>
                         <button onClick={()=>{
-                            router.push("/dashboard")
-                            setActiveRoute("Dashboard")
-                        }} className="mx-6">Dashboard</button>
-                        <button onClick={()=>{
-                            router.push("/profile")
-                            setActiveRoute("Profile")
-                        }} className="mx-6">UserProfile</button>
-                        <button onClick={()=>{
-                            router.push("/events")
+                            router.push("/dashboard/events")
                             setActiveRoute("Events")
                         }} className="mx-6">Events</button>
                         <button onClick={()=>{
-                            router.push("/customs")
+                            router.push("/dashboard/customs")
                             setActiveRoute("Customs")
-                        }} className="mx-6">Customs</button>
-                        <button  className="mx-6">Logout</button>
+                        }} className="mx-6">Priority</button>
+                        <button onClick={() => {
+                            Logout();
+                            router.push("/")
+                        }}  className="mx-6">Logout</button>
 
                     </div>
                 </div>

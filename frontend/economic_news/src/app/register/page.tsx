@@ -1,17 +1,34 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { useUserStore } from '@/store/UserStore';
 
 const RegisterPage: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
 
+    const router = useRouter();
+
+    const { user , Register } = useUserStore();
+
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         // Handle registration logic here
         console.log({ username, password, email });
+
+        Register({ username, password, email });
     };
+
+    useEffect(() => {
+
+        if (user) {
+            router.push('/dashboard/events');
+        }
+
+    } , [user])
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -64,6 +81,12 @@ const RegisterPage: React.FC = () => {
                         Register
                     </button>
                 </form>
+                <p className="text-center text-sm text-gray-600">
+                    Already have an account?{' '}
+                    <a onClick={() => {router.push("/")}} className="font-medium text-indigo-600 hover:text-indigo-500 cursor-pointer">
+                        Login here
+                    </a>
+                </p>
             </div>
         </div>
     );
